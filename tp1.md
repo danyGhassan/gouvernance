@@ -142,4 +142,42 @@ Nous retenons le scénario stratégique 2 : **compromission d’un employé inte
 **Justification :** l’environnement décrit présente plusieurs facteurs favorisant ce scénario — absence de MFA, mots de passe simples, faible sensibilisation au phishing et supervision quasi inexistante ; ces conditions rendent l’exploitation par phishing et l’usage d’identifiants compromis relativement facile et crédible.
 
 ---
-**Remarque (facultative pour le carnet de bord)** : ce scénario opérationnel souligne l’urgence d’actions courtes (MFA, formation phishing, surveillance des logs, segmentation des droits, tests de restauration) pour réduire à la fois la vraisemblance et l’impact.
+
+
+# Atelier 5 – Traitement du risque et plan d’action
+
+## 1. Synthèse des risques
+
+| Scénario | Gravité | Vraisemblance | Niveau global |
+|----------|----------|---------------|----------------|
+| Scénario 1 – Hébergeur compromis → indisponibilité + chiffrement | 4 | Possible | Élevé |
+| Scénario 2 – Phishing interne → fraude + fuite de données | 4 | Probable | Critique |
+
+**Échelle utilisée :**  
+- **Faible** = impact et proba faibles  
+- **Modéré** = impact moyen OU proba modérée  
+- **Élevé** = impact fort OU proba forte  
+- **Critique** = impact et proba très forts (impact légal + financier + médiatique)
+
+## 2. Traitement des risques
+
+| Scénario | Stratégie de traitement | Justification |
+|----------|--------------------------|----------------|
+| Scénario 1 – Hébergeur compromis | Réduire | Limiter l’impact et améliorer la continuité (sauvegardes, PRA). |
+| Scénario 2 – Phishing interne | Réduire | C’est un risque critique mais maîtrisable (MFA + détection). |
+
+*Aucun risque n’est transféré ou évité ici — le cœur du business repose sur ces fonctions.*
+
+## 3. Plan d’action priorisé
+
+| Mesure | Objectif | Responsable | Délai |
+|--------|----------|-------------|--------|
+| **Mise en place MFA / 2FA** sur comptes admin + prestataire | Réduire probabilité (compromission identifiants) | DSI + Prestataire IT | Court terme |
+| **Sensibilisation anti-phishing + simulation interne** | Réduire probabilité (erreur humaine) | Direction + RH | Court terme |
+| **Supervision + alertes en temps réel SI critique** | Réduire probabilité et impact (détection précoce) | DSI | Court terme |
+| **Tests réguliers de restauration + renforcement sauvegardes** | Réduire impact (résilience) | DSI | Moyen terme |
+| **Segmentation / limitation des privilèges par profil** | Réduire impact (limiter mouvement latéral) | Prestataire IT | Moyen terme |
+| **Contrat / exigence de sécurité avec l’hébergeur (SLA, PRA)** | Réduire impact + transférer partiellement | Direction | Moyen à long terme |
+
+---
+
