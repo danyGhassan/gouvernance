@@ -59,3 +59,87 @@ Comprendre qui pourrait menacer l’entreprise et pour quelles raisons.
 | Concurrent malveillant | Externe | Obtenir des informations commerciales confidentielles ou perturber le service | Moyenne à élevée | Ressources financières et humaines, techniques de renseignement | Occasionnel |
 | Fournisseur tiers compromis | Externe | Propager une attaque indirecte sur DataSecuRetail (ex. : hébergeur, paiement, logistique) | Moyenne | Accès aux systèmes interconnectés, compétences techniques | Occasionnel |
 | Malware / ransomware automatisé | Externe | Indisponibilité du SI, chantage financier | Élevée | Très automatisé, nécessite peu d’intervention humaine | Fréquent |
+
+# Atelier 3 – Scénarios stratégiques
+
+## Cartographie simple de l'écosystème
+
+
+L’écosystème de DataSecuRetail repose sur plusieurs acteurs interconnectés :
+
+- **Hébergeur cloud** : héberge le site web marchand et la base de données clients. Il dispose d’accès administratifs à l’infrastructure.
+- **Prestataire IT** : chargé de la maintenance et du support technique, avec accès à distance (VPN ou SSH).
+- **Plateforme de paiement tierce** : gère les transactions bancaires et envoie des confirmations de paiement via API ou webhooks.
+- **Transporteur logistique** : reçoit automatiquement les commandes validées et transmet les informations d’expédition.
+- **Clients** : accèdent au site web pour consulter, commander et payer des produits.
+- **DataSecuRetail (système interne)** : site web, mini-ERP, traitement des commandes, mise à jour des données clients.
+
+Chaque acteur échange des données ou des accès avec DataSecuRetail, formant un réseau de confiance exposé aux risques indirects.
+
+## 2. Scénario stratégique 1 (fonctionnel)
+
+- **Source de risque** : fournisseur tiers compromis (hébergeur cloud)  
+- **Voie d’attaque** : l’attaquant exploite une vulnérabilité non corrigée dans l’infrastructure de l’hébergeur et accède directement aux serveurs du site. Il chiffre la base de données et rend le site indisponible.  
+- **Valeur métier touchée** : disponibilité du site web et intégrité des données clients  
+- **Événement redouté réalisé** : interruption totale du service e-commerce et corruption/chiffrement des données critiques.  
+- **Gravité estimée** : 4 (réf. Atelier 1)
+
+## 3. Scénario stratégique 2 (fonctionnel)
+
+- **Source de risque** : compromission d’un employé interne (phishing ou mot de passe faible)  
+- **Voie d’attaque** : l’attaquant vole les identifiants d’administration et modifie les informations de paiement ou exfiltre les données clients via le mini-ERP ou la console de paiement.  
+- **Valeur métier touchée** : sécurité des paiements et confidentialité des données clients  
+- **Événement redouté réalisé** : fraude financière + fuite massive de données personnelles (RGPD).  
+- **Gravité estimée** : 4 (réf. Atelier 1)
+
+# Atelier 4 – Scénarios opérationnels
+
+**Scénario choisi (sélection)**  
+Nous retenons le scénario stratégique 2 : **compromission d’un employé interne (phishing / mot de passe faible)** conduisant à fraude sur les paiements et exfiltration de données clients. Ce scénario est à la fois critique (impact financier et RGPD) et vraisemblable compte tenu des contrôles actuels.
+
+## Déroulé opérationnel — étapes (6 à 8 étapes claires)
+
+1. **Reconnaissance ciblée** — L'attaquant collecte des informations publiques sur DataSecuRetail et ses employés (LinkedIn, pages “contact”, répertoire) pour identifier une cible interne (ex. comptabilité, support, admin ERP).  
+   *Composant visé : sources publiques / comptes mail ciblés.*
+
+2. **Envoi de phishing** — L'attaquant envoie un e-mail de phishing soigneusement rédigé (faux message client, facture, ou alerte de paiement) contenant un lien vers une page de credential-harvesting ou une pièce jointe malveillante.  
+   *Composant visé : boîte mail de l'employé, client de messagerie.*
+
+3. **Compromission des identifiants** — L'employé, sans formation suffisante et utilisant un mot de passe simple, saisit ses identifiants sur la fausse page ou ouvre la pièce jointe qui installe un stealers/backdoor. L'attaquant récupère les identifiants ou obtient un accès initial sur le poste.  
+   *Composant visé : poste utilisateur Windows 11 de l'employé, session mail.*
+
+4. **Escalade/usage des accès** — Avec ces identifiants, l'attaquant se connecte à la console du mini-ERP ou à la console d'administration de la plateforme de paiement (selon les droits), ou installe un accès persistant (web shell, reverse shell) sur le poste/serveur compromis.  
+   *Composant visé : mini-ERP, console de paiement, serveur applicatif, VPN/SSH si les mêmes identifiants y donnent accès.*
+
+5. **Actions malveillantes sur le SI** — L'attaquant modifie les coordonnées bancaires de certaines commandes, déclenche remboursements frauduleux, ou exporte des enregistrements clients (noms, adresses, emails, éventuellement éléments de paiement).  
+   *Composant visé : base de données clients, module commandes du mini-ERP, API paiement.*
+
+6. **Exfiltration des données & dissimulation** — Les données volées sont compressées/chiffrées et exfiltrées via un canal chiffré (HTTPS vers un serveur contrôlé) ; l'attaquant efface ou altère journaux pour retarder la détection.  
+   *Composant visé : logs applicatifs, poste compromis, connexion réseau sortante.*
+
+7. **Monétisation / exploitation** — Les fonds détournés sont encaissés via des comptes mule ou vendus sur le marché noir ; les données personnelles sont vendues ou utilisées pour fraudes supplémentaires.  
+   *Composant visé : services externes / comptes tiers exploités pour blanchiment.*
+
+8. **Impact et découverte** — L’entreprise détecte anomalies (clients se plaignent, litige payment, ou alertes externes) ; réponse tardive en raison d’une supervision faible et d’alertes non paramétrées.  
+   *Composant visé : SI de supervision / helpdesk, services juridiques/commercials.*
+
+## Biens supports impliqués (liste)
+
+- Postes utilisateurs (compte employé cible, client mail)  
+- Serveur applicatif / console d'administration du site  
+- Mini-ERP (module gestion commandes, interfaces admin)  
+- Console/API de la plateforme de paiement (webhooks, tokens)  
+- Base de données clients (hébergée chez prestataire cloud)  
+- Accès VPN / accès du prestataire IT (si mêmes credentials ou pivot possible)  
+- Journaux (logs applicatifs, logs d’accès)  
+- Sauvegardes (pour évaluer restauration possible)  
+- Connexions réseau sortantes (canal d’exfiltration)
+
+## Évaluation de la vraisemblance
+
+**Cotation : Probable**
+
+**Justification :** l’environnement décrit présente plusieurs facteurs favorisant ce scénario — absence de MFA, mots de passe simples, faible sensibilisation au phishing et supervision quasi inexistante ; ces conditions rendent l’exploitation par phishing et l’usage d’identifiants compromis relativement facile et crédible.
+
+---
+**Remarque (facultative pour le carnet de bord)** : ce scénario opérationnel souligne l’urgence d’actions courtes (MFA, formation phishing, surveillance des logs, segmentation des droits, tests de restauration) pour réduire à la fois la vraisemblance et l’impact.
